@@ -1,0 +1,92 @@
+---
+title: "Human Activity Recognition"
+author: "Andrei Kuebar"
+date: "Sunday, April 17, 2016"
+output: html_document
+---
+
+# Summary
+In this project we are dealing with the human activity data gathered by means of commonly available fitness trackers such as Jawbone or Fitbit.
+
+More details on the data are here: [link](http://groupware.les.inf.puc-rio.br/har)
+
+Model we are building is going to predict the fashion in which the exercise was performed. There are total 5 possiblities, out of which 4 are incorrect technique and 1 correct. They are marked "A", "B", "C", "D" and "E". "A" being the correct one and others incorrect.
+
+# Get the data
+Download the training and test datasets from:
+
+[train data](https://eventing.coursera.org/api/redirectStrict/BShbnUGy5UftRGyQm7vg-mQrT2Wtz7-GeN_bEl6rLLxEoNx_6xxFkqldMUelho0FQOK8ibQ3b-zHbXfsQ90yvg.Du4b6W90rCwPGeAl54V8zg.7789zd8s0B5I-0DHZl-FkYAqeHkJqfgv58FSNVpggClDZmRp6btrp9inLWtO4dYmZrLCAnXGW-BXypZx75giSBZd-teT13Ywr9BwTk8DL7Dhz_Lmz3LtYEALyDDDsDlPxfgROk9NrNQ8qqtEUpdRI1vF3xQ2Snor2ZD97gXx9V7d6vsBn3CZF7hYIvT-ky-8fJFmzh_lfPXAo0uIeJeHHJbXpg8WcCiWjfeLfp8VT1kUcB-9HxvxrX8ntQe6CPIz0Ag0jsYlVHN8LS_x3k7-l7HMUZG8AIOrGeF6PuisRuHfn7QgBKooFjiMcKcTeGFSIJl2SzZBKoDMlzDPq292QtIVKbIH8MhKDcZjrU0Kkd1QlaY0R2rTvn3zbBXVJzOmziRRRQA9KuhH5Y5x54zCXA)
+
+[test data](https://eventing.coursera.org/api/redirectStrict/BShbnUGy5UftRGyQm7vg-mQrT2Wtz7-GeN_bEl6rLLxEoNx_6xxFkqldMUelho0FQOK8ibQ3b-zHbXfsQ90yvg.Du4b6W90rCwPGeAl54V8zg.7789zd8s0B5I-0DHZl-FkYAqeHkJqfgv58FSNVpggClDZmRp6btrp9inLWtO4dYmZrLCAnXGW-BXypZx75giSBZd-teT13Ywr9BwTk8DL7Dhz_Lmz3LtYEALyDDDsDlPxfgROk9NrNQ8qqtEUpdRI1vF3xQ2Snor2ZD97gXx9V7d6vsBn3CZF7hYIvT-ky-8fJFmzh_lfPXAo0uIeJeHHJbXpg8WcCiWjfeLfp8VT1kUcB-9HxvxrX8ntQe6CPIz0Ag0jsYlVHN8LS_x3k7-l7HMUZG8AIOrGeF6PuisRuHfn7QgBKooFjiMcKcTeGFSIJl2SzZBKoDMlzDPq292QtIVKbIH8MhKDcZjrU0Kkd1QlaY0R2rTvn3zbBXVJzOmziRRRQA9KuhH5Y5x54zCXA)
+
+```{r}
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+```
+
+# Clean the data
+### Remove all column containing NA or empty strings
+```{r}
+trColNA<-sapply(training, function (x) ( sum(is.na(x))>0|sum(x=="")>0 ) )
+training_NNA<-training[,names(training)[!trColNA]]
+dim(training_NNA)
+```
+
+### Pick only the variables which contain measurements
+```{r}
+pred<-names(training_NNA)[grep("roll|pitch|yaw|gyros|^accel|^magnet",names(training_NNA))]
+names(training_NNA[,pred])
+```
+
+# Fit the model
+
+### Enable parallelization
+```{r eval=FALSE}
+library(parallel)
+library(doParallel)
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster)
+#stopCluster(cluster)
+```
+
+### Configure the trainControl object to define cross-validation method.
+```{r eval=FALSE}
+fitControl <- trainControl(method = "boot",
+                           number = 10,
+                           allowParallel = TRUE)
+```
+
+### After trying out several different models, RandomForest model proved to have the highest accuracy.
+```{r cache=TRUE, eval=FALSE}
+modFit<-train(training_NNA[,pred], training_NNA$classe,  method="rf", trControl = fitControl)
+modFit
+```
+```{r eval=FALSE}
+  mtry  Accuracy   Kappa      Accuracy SD   Kappa SD   
+   2    0.9936879  0.9920126  0.0013031752  0.001645974
+  25    0.9936011  0.9919028  0.0009676512  0.001222974
+  48    0.9873407  0.9839790  0.0027990771  0.003543746
+```
+
+### We can now generate the predictions on the test data
+```{r eval=FALSE}
+colnames<-as.character(1:20)
+predTest<-as.character(predict(modFit,testing[,pred]))
+names(predTest)<-colnames
+predTest
+```
+
+```{r eval=FALSE}
+  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
+"B" "A" "B" "A" "A" "E" "D" "B" "A" "A" "B" "C" "B" "A" "E" "E" "A" "B" "B" "B" 
+```
+
+
+
+
+
+
+
+
+
+
