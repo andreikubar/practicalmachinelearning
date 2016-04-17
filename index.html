@@ -136,6 +136,10 @@ modFit</code></pre>
    2    0.9936879  0.9920126  0.0013031752  0.001645974
   25    0.9936011  0.9919028  0.0009676512  0.001222974
   48    0.9873407  0.9839790  0.0027990771  0.003543746</code></pre>
+<p>Most important 5 variables:</p>
+<pre class="r"><code>modFit$finalModel$importance[1:5,]</code></pre>
+<pre class="r"><code>   roll_belt   pitch_belt     yaw_belt gyros_belt_x gyros_belt_y 
+    820.0890     531.8274     651.6552     180.5453     172.2886 </code></pre>
 </div>
 <div id="we-can-now-generate-the-predictions-on-the-test-data" class="section level3">
 <h3>We can now generate the predictions on the test data</h3>
@@ -145,6 +149,7 @@ names(predTest)&lt;-colnames
 predTest</code></pre>
 <pre class="r"><code>  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
 &quot;B&quot; &quot;A&quot; &quot;B&quot; &quot;A&quot; &quot;A&quot; &quot;E&quot; &quot;D&quot; &quot;B&quot; &quot;A&quot; &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;B&quot; &quot;A&quot; &quot;E&quot; &quot;E&quot; &quot;A&quot; &quot;B&quot; &quot;B&quot; &quot;B&quot; </code></pre>
+<p>As confirmed by the quizz, out of sample accuracy was 100%</p>
 </div>
 </div>
 

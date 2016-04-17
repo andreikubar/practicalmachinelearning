@@ -68,6 +68,15 @@ modFit
   48    0.9873407  0.9839790  0.0027990771  0.003543746
 ```
 
+Most important 5 variables:
+```{r eval=FALSE}
+modFit$finalModel$importance[1:5,]
+```
+```{r eval=FALSE}
+   roll_belt   pitch_belt     yaw_belt gyros_belt_x gyros_belt_y 
+    820.0890     531.8274     651.6552     180.5453     172.2886 
+```
+
 ### We can now generate the predictions on the test data
 ```{r eval=FALSE}
 colnames<-as.character(1:20)
@@ -80,7 +89,7 @@ predTest
   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
 "B" "A" "B" "A" "A" "E" "D" "B" "A" "A" "B" "C" "B" "A" "E" "E" "A" "B" "B" "B" 
 ```
-
+As confirmed by the quizz, out of sample accuracy was 100%
 
 
 
